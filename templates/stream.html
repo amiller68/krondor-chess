@@ -1,0 +1,7 @@
+<!-- templates/stream.html -->
+
+<!-- Using hx-swap here will still allow us to swap into the inner element, despite not having any triggers -->
+<div hx-sse="connect:/todos/stream swap:message" hx-swap="beforeend">
+
+</div>
+

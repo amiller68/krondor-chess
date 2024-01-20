@@ -1,0 +1,18 @@
+[package]
+name = "krondor-chess"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+askama = { version = "0.12.1", features = ["with-axum"] }
+askama_axum = "0.4.0"
+axum = "0.7.3"
+serde = "1.0.195"
+serde_json = "1.0.111"
+shuttle-axum = "0.36.0"
+shuttle-runtime = "0.36.0"
+shuttle-shared-db = { version = "0.36.0", features = ["postgres"] }
+sqlx = "0.7.3"
+tokio = "1.28.2"
+tokio-stream = { version = "0.1.14", features = ["sync"] }
+tracing = "0.1.40"
