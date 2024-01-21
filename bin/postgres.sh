@@ -48,6 +48,7 @@ function create-postgres-container {
 		postgres
 }
 
+
 function clean() {
 	docker stop ${POSTGRES_CONTAINER_NAME} || true
 	${CONTAINER_RUNTIME} rm -fv ${POSTGRES_CONTAINER_NAME} || true

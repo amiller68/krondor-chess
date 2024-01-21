@@ -18,8 +18,13 @@ time = { version = "0.3.31", features = ["serde"] }
 tokio = "1.28.2"
 tokio-stream = { version = "0.1.14", features = ["sync"] }
 tower-http = { version = "0.5.1", features = ["fs"] }
-tracing = "0.1.40"
 uuid = { version = "1.7.0", features = ["serde"] }
+
+tracing = "^0.1"
+tracing-appender = "^0.2"
+tracing-futures = { version = "^0.2", default-features = false, features = ["std-future"] }
+tracing-subscriber = { version = "^0.3", default-features = false, features = ["ansi", "env-filter", "fmt", "local-time", "time", "tracing"] }
+
 
 # TODO: add prop tests for database types
 # [dev-dependencies]

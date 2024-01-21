@@ -2,11 +2,10 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Board</h1>
-    <button hx-post="/games" hx-trigger="click" hx-target="#gameContent" hx-swap="outerHTML" id="newGameButton">New Game</button>
-	<div id="gameContent">
-    		<!-- New game content will be loaded here -->
-		<!-- It will listen for updates to a game with an id it knows -->
-	</div>
+<h1>Games</h1>
+<button hx-post="/games" hx-trigger="click" hx-target="#games-content" hx-swap="beforeend">New Game</button>
+<div id="games-list" hx-get="/games" hx-target="this" hx-trigger="load" hx-swap="outerHTML">
+	Loading...
+</div>
 {% endblock %}
 

@@ -1,7 +1,8 @@
+use sqlx::types::Uuid;
 use sqlx::FromRow;
 use sqlx::PgConnection;
+use sqlx::PgPool;
 use time::OffsetDateTime;
-use sqlx::types::Uuid;
 
 use super::game_outcome::GameOutcome;
 use super::game_status::GameStatus;
@@ -10,7 +11,7 @@ use super::game_winner::GameWinner;
 pub struct NewGame;
 
 impl NewGame {
-    pub async fn create(conn: &mut PgConnection) -> Result<Game, sqlx::Error> {
+    pub async fn create(conn: &PgPool) -> Result<Game, sqlx::Error> {
         let game = sqlx::query_as!(
             Game,
             r#"INSERT INTO games DEFAULT VALUES RETURNING
@@ -23,13 +24,13 @@ impl NewGame {
                 outcome as "outcome: GameOutcome"
             "#,
         )
-        .fetch_one(&mut *conn)
+        .fetch_one(conn)
         .await?;
         Ok(game)
     }
 }
 
-#[derive(FromRow)]
+#[derive(Debug, FromRow)]
 pub struct Game {
     id: Uuid,
     current_fen_id: Uuid,
@@ -64,9 +65,8 @@ impl Game {
         &self.outcome
     }
 
-
     // TODO: pagination
-    pub async fn read_all(conn: &mut PgConnection) -> Result<Vec<Game>, sqlx::Error> {
+    pub async fn read_all(conn: &PgPool) -> Result<Vec<Game>, sqlx::Error> {
         let games = sqlx::query_as!(
             Game,
             r#"SELECT
@@ -80,29 +80,8 @@ impl Game {
             FROM games
             "#,
         )
-        .fetch_all(&mut *conn)
+        .fetch_all(conn)
         .await?;
         Ok(games)
-    }
-
-    pub async fn read_by_id(conn: &mut PgConnection, id: Uuid) -> Result<Game, sqlx::Error> {
-        let game = sqlx::query_as!(
-            Game,
-            r#"SELECT
-                id as "id: Uuid",
-                current_fen_id as "current_fen_id: Uuid",
-                created_at as "created_at: OffsetDateTime",
-                updated_at as "updated_at: OffsetDateTime",
-                status as "status: GameStatus",
-                winner as "winner: GameWinner",
-                outcome as "outcome: GameOutcome"
-            FROM games
-            WHERE id = $1
-            "#,
-            id
-        )
-        .fetch_one(&mut *conn)
-        .await?;
-        Ok(game)
     }
 }

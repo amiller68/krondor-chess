@@ -8,15 +8,15 @@ use serde::{Deserialize, Serialize};
 pub enum GameOutcome {
     Checkmate,
     Stalemate,
-    Resignation
+    Resignation,
 }
 
 impl Display for GameOutcome {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
-            GameOutcome::Checkmate => write!(f, "Checkmate"),
-            GameOutcome::Stalemate => write!(f, "Stalemate"),
-            GameOutcome::Resignation => write!(f, "Resignation"),
+            GameOutcome::Checkmate => write!(f, "checkmate"),
+            GameOutcome::Stalemate => write!(f, "stalemate"),
+            GameOutcome::Resignation => write!(f, "resignation"),
         }
     }
 }
@@ -26,9 +26,9 @@ impl TryFrom<&str> for GameOutcome {
 
     fn try_from(value: &str) -> Result<Self, Self::Error> {
         match value {
-            "Checkmate" => Ok(GameOutcome::Checkmate),
-            "Stalemate" => Ok(GameOutcome::Stalemate),
-            "Resignation" => Ok(GameOutcome::Resignation),
+            "checkmate" => Ok(GameOutcome::Checkmate),
+            "stalemate" => Ok(GameOutcome::Stalemate),
+            "resignation" => Ok(GameOutcome::Resignation),
             _ => Err(GameOutcomeError::InvalidGameOutcome),
         }
     }

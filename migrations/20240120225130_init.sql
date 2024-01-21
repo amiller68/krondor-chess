@@ -2,7 +2,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- Track all unique FENs
 CREATE TABLE IF NOT EXISTS fens (
-    id UUID PRIMARY KEY NOT NULL,
+    id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
     fen TEXT UNIQUE NOT NULL,
     created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
@@ -14,7 +14,7 @@ ON CONFLICT DO NOTHING;
 
 -- Games are an id and associated metadata
 CREATE TABLE IF NOT EXISTS games (
-    id uuid PRIMARY KEY NOT NULL,
+    id uuid PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
     -- Current board position -- by default, start position
     current_fen_id UUID REFERENCES fens(id) NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000',
     created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS games (
 CREATE INDEX IF NOT EXISTS idx_games_updated_at ON games(updated_at);
 
 CREATE TABLE IF NOT EXISTS moves (
-    id UUID PRIMARY KEY NOT NULL,
+    id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
     game_id UUID NOT NULL REFERENCES games(id) ON DELETE CASCADE,
     fen_id UUID NOT NULL REFERENCES fens(id) ON DELETE CASCADE,
     move_number INTEGER NOT NULL,

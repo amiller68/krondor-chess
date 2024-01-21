@@ -1,21 +1,16 @@
-
 use axum::{
-    extract::{Path, State},
-    http::StatusCode,
-    response::{sse::Event, IntoResponse, Response, Sse},
-    routing::{delete, get, get_service},
-    Extension, Form, Router,
+    response::{sse::Event, Sse},
+    Extension,
 };
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use serde_json::json;
-use sqlx::PgPool;
+
 use sqlx::types::Uuid;
 use std::convert::Infallible;
 use std::time::Duration;
-use tokio::sync::broadcast::{channel, Sender};
+use tokio::sync::broadcast::Sender;
 use tokio_stream::wrappers::BroadcastStream;
 use tokio_stream::{Stream, StreamExt as _};
-use tower_http::services::{ServeDir, ServeFile};
 
 // Stream for sending updates to the Games page
 pub type GamesStream = Sender<GamesUpdate>;

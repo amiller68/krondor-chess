@@ -1,32 +1,20 @@
 use askama::Template;
 use axum::{
-    extract::{Path, State},
-    http::StatusCode,
-    response::{sse::Event, IntoResponse, Response, Sse},
-    routing::{delete, get, get_service},
-    Extension, Form, Router,
+    extract::State,
+    response::{IntoResponse, Response},
 };
-use serde::{Deserialize, Serialize};
-use serde_json::json;
-use sqlx::PgPool;
-use sqlx::types::Uuid;
-use std::convert::Infallible;
-use std::time::Duration;
-use tokio::sync::broadcast::{channel, Sender};
-use tokio_stream::wrappers::BroadcastStream;
-use tokio_stream::{Stream, StreamExt as _};
-use tower_http::services::{ServeDir, ServeFile};
 
-use crate::AppState;
-use crate::stream::GamesStream;
-use crate::database::models::Game;
 use crate::api::models::ApiGame;
+use crate::database::models::Game;
+use crate::AppState;
 
-pub async fn handler(State(state): State<AppState>) -> Result<Response, ReadAllGamesError> {
-    let mut conn = state.db.acquire().await?;
-    let games = Game::read_all(&mut *conn).await?;
+pub async fn handler(
+    State(state): State<AppState>,
+) -> Result<impl IntoResponse, ReadAllGamesError> {
+    let conn = state.database();
+    let games = Game::read_all(&conn).await?;
     let api_games = games.into_iter().map(ApiGame::from).collect();
-    Ok(Records { api_games }.into_response())
+    Ok(Records { api_games })
 }
 
 #[derive(Template)]
@@ -39,4 +27,11 @@ struct Records {
 pub enum ReadAllGamesError {
     #[error("sqlx error: {0}")]
     Sqlx(#[from] sqlx::Error),
+}
+
+impl IntoResponse for ReadAllGamesError {
+    fn into_response(self) -> Response {
+        let body = format!("{}", self);
+        (axum::http::StatusCode::INTERNAL_SERVER_ERROR, body).into_response()
+    }
 }
