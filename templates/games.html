@@ -1,0 +1,17 @@
+<!-- templates/games.html -->
+<div id="games">
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody id="games-content">
+        {% for api_game in api_games %}
+            {% include "game.html" %}
+        {% endfor %}
+    </tbody>
+</table>
+</div>
+

@@ -12,6 +12,7 @@ check:
 
 .PHONY: clean
 clean:
+	./bin/postgres.sh clean
 	cargo clean
 
 .PHONY: fmt
@@ -28,7 +29,7 @@ clippy:
 
 .PHONY: postgres
 postgres:
-	./bin/local_postgres.sh start
+	./bin/postgres.sh run
 
 .PHONY: test
 test:
