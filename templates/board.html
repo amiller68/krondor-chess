@@ -1,0 +1,8 @@
+<!-- templates/game.html -->
+<body>
+	<div id="board" class="board" hx-get="/games/{{ game.id }}" hx-trigger="load" hx-target="self">
+		<!-- The chessboard will be loaded here by the server -->
+   	</div>
+
+    	<script src="/static/js/board.js"></script>
+</body>

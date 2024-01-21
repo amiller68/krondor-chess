@@ -3,7 +3,7 @@ use axum::{
     extract::{Path, State},
     http::StatusCode,
     response::{sse::Event, IntoResponse, Response, Sse},
-    routing::{delete, get},
+    routing::{delete, get, get_service},
     Extension, Form, Router,
 };
 use serde::{Deserialize, Serialize};
@@ -14,9 +14,13 @@ use std::time::Duration;
 use tokio::sync::broadcast::{channel, Sender};
 use tokio_stream::wrappers::BroadcastStream;
 use tokio_stream::{Stream, StreamExt as _};
+use tower_http::services::{ServeDir, ServeFile};
 
-pub type TodosStream = Sender<TodoUpdate>;
+mod db;
 
+// pub type GameStream = Sender<GameUpdate>;
+
+/*
 #[derive(Clone, Serialize, Debug)]
 pub enum MutationKind {
     Create,
@@ -33,17 +37,16 @@ struct Todo {
     id: i32,
     description: String,
 }
-
 #[derive(sqlx::FromRow, Serialize, Deserialize)]
 struct TodoNew {
     description: String,
 }
 
+*/
 #[derive(Clone)]
 struct AppState {
     db: PgPool,
 }
-
 #[shuttle_runtime::main]
 async fn main(#[shuttle_shared_db::Postgres] db: PgPool) -> shuttle_axum::ShuttleAxum {
     sqlx::migrate!()
@@ -51,26 +54,37 @@ async fn main(#[shuttle_shared_db::Postgres] db: PgPool) -> shuttle_axum::Shuttl
         .await
         .expect("Looks like something went wrong with migrations :(");
 
-    let (tx, _rx) = channel::<TodoUpdate>(10);
+ //    let (tx, _rx) = channel::<TodoUpdate>(10);
     let state = AppState { db };
 
     let router = Router::new()
-        .route("/", get(home))
-        .route("/stream", get(stream))
-        .route("/styles.css", get(styles))
-        .route("/todos", get(fetch_todos).post(create_todo))
-        .route("/todos/:id", delete(delete_todo))
-        .route("/todos/stream", get(handle_stream))
-        .with_state(state)
-        .layer(Extension(tx));
+        .route("/", get(index))
+        .route("/static", get_service(
+                ServeDir::new("static").fallback(ServeFile::new("static/not_found.html"))
+            ))
+    //    .route("/stream", get(stream))
+   //     .route("/styles.css", get(styles))
+  //      .route("/todos", get(fetch_todos).post(create_todo))
+  //      .route("/todos/:id", delete(delete_todo))
+ //       .route("/todos/stream", get(handle_stream))
+        .with_state(state);
+ //       .layer(Extension(tx));
 
     Ok(router.into())
 }
 
-async fn home() -> impl IntoResponse {
-    HelloTemplate
+// Function to handle any error that occurs while serving files
+fn handle_error(error: std::io::Error) -> impl IntoResponse {
+    (
+        StatusCode::INTERNAL_SERVER_ERROR,
+        format!("Unhandled internal error: {}", error),
+    )
 }
 
+async fn index() -> impl IntoResponse {
+    IndexTemplate
+}
+/*
 async fn stream() -> impl IntoResponse {
     StreamTemplate
 }
@@ -147,11 +161,11 @@ async fn delete_todo(
 
     StatusCode::OK
 }
-
+*/
 #[derive(Template)]
 #[template(path = "index.html")]
-struct HelloTemplate;
-
+struct IndexTemplate;
+/*
 #[derive(Template)]
 #[template(path = "stream.html")]
 struct StreamTemplate;
@@ -190,3 +204,4 @@ pub async fn handle_stream(
             .text("keep-alive-text"),
     )
 }
+*/
