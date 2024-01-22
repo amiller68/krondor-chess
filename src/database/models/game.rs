@@ -29,6 +29,7 @@ impl NewGame {
     }
 }
 
+#[allow(dead_code)]
 #[derive(Debug, FromRow)]
 pub struct Game {
     id: Uuid,
@@ -100,7 +101,7 @@ impl PartialGameWithFen {
     pub fn current_fen(&self) -> &str {
         &self.current_fen
     }
-    
+
     pub async fn read(conn: &PgPool, id: Uuid) -> Result<Option<PartialGameWithFen>, sqlx::Error> {
         let game = sqlx::query_as!(
             PartialGameWithFen,
