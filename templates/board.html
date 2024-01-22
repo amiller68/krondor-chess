@@ -1,8 +1,11 @@
-<!-- templates/game.html -->
-<body>
-	<div id="board" class="board" hx-get="/games/{{ game.id }}" hx-trigger="load" hx-target="self">
-		<!-- The chessboard will be loaded here by the server -->
-   	</div>
+<!-- templates/board.html -->
+{% extends "base.html" %}
 
-    	<script src="/static/js/board.js"></script>
-</body>
+{% block content %}
+<h1>Board</h1>
+
+<div id="board-{{ api_board.id }}">
+	{{ api_board.pretty_string }}
+</div>
+
+{% endblock %}

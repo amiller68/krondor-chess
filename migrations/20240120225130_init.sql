@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS fens (
 
 -- Insert the initial FEN if not already present
 INSERT INTO fens (id, fen) 
-VALUES ('00000000-0000-0000-0000-000000000000', 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR')
+VALUES ('00000000-0000-0000-0000-000000000000', 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
 ON CONFLICT DO NOTHING;
 
 -- Games are an id and associated metadata

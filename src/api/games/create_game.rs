@@ -2,32 +2,14 @@ use askama::Template;
 use axum::{
     extract::State,
     response::{IntoResponse, Response},
-    Extension,
 };
 
 use crate::api::models::ApiGame;
 use crate::database::models::NewGame;
 use crate::AppState;
-// use crate::stream::{GamesMutationKind, GamesStream, GamesUpdate};
 
-pub async fn handler(
-    State(state): State<AppState>,
-    // Extension(tx): Extension<GamesStream>
-) -> Result<impl IntoResponse, CreateGameError> {
+pub async fn handler(State(state): State<AppState>) -> Result<impl IntoResponse, CreateGameError> {
     let game = NewGame::create(&state.database()).await?;
-
-    // if tx
-    //     .send(GamesUpdate {
-    //         mutation_kind: GamesMutationKind::Create,
-    //         id: game.id(),
-    //     })
-    //     .is_err()
-    // {
-    //     eprintln!(
-    //         "Record with ID {} was created but nobody's listening to the stream!",
-    //         game.id()
-    //     );
-    // }
 
     let api_game = ApiGame::from(game);
     Ok(NewGameTemplate { api_game })

@@ -1,20 +1,11 @@
 use askama::Template;
-use axum::{
-    response::IntoResponse,
-    routing::{get, get_service},
-    Extension, Router,
-};
+use axum::{response::IntoResponse, routing::get, Router};
 use sqlx::PgPool;
 
-use tokio::sync::broadcast::channel;
-
-use tower_http::services::{ServeDir, ServeFile};
+use tower_http::services::ServeDir;
 
 mod api;
 mod database;
-// mod stream;
-
-// use stream::{handle_game_stream, GamesUpdate};
 
 #[derive(Clone)]
 pub struct AppState {
@@ -49,21 +40,22 @@ async fn main(
     // Register panics as they happen
     register_panic_logger();
 
-    // Setup Router + Streams
-    // let (tx, _rx) = channel::<GamesUpdate>(10);
+    // TODO: Move api router into api module
+    // Setup Router
     let router = Router::new()
         // Home page
         .route("/", get(index))
-        // .route("/stream", get(stream))
         .route(
             "/games",
             get(api::games::read_all_games::handler).post(api::games::create_game::handler),
         )
-        // .route("/games/stream", get(handle_game_stream))
+        .route(
+            "/games/:game_id",
+            get(api::games::board::read_board::handler),
+        )
         .with_state(state)
         // Static assets
         .nest_service("/static", ServeDir::new("static"));
-    // .layer(Extension(tx));
 
     // Run!
     Ok(router.into())
@@ -73,17 +65,9 @@ async fn index() -> impl IntoResponse {
     IndexTemplate
 }
 
-// async fn stream() -> impl IntoResponse {
-//     StreamTemplate
-// }
-
 #[derive(Template)]
 #[template(path = "index.html")]
 struct IndexTemplate;
-
-// #[derive(Template)]
-// #[template(path = "stream.html")]
-// struct StreamTemplate;
 
 /// Sets up system panics to use the tracing infrastructure to log reported issues. This doesn't
 /// prevent the panic from taking out the service but ensures that it and any available information

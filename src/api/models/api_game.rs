@@ -1,5 +1,3 @@
-use serde::Serialize;
-
 use crate::database::models::Game;
 
 pub struct ApiGame {
