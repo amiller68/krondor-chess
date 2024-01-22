@@ -1,0 +1,11 @@
+<!-- templates/board.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Board</h1>
+
+<div id="board-{{ api_board.id }}">
+	{{ api_board.pretty_string }}
+</div>
+
+{% endblock %}
