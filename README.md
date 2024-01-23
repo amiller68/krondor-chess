@@ -7,7 +7,43 @@ Right now all the web app does is allow you to create a game, and view the prett
 
 See [https://krondor-chess.shuttleapp.rs/](https://krondor-chess.shuttleapp.rs) for deployed version
 
-TODOS:
+## Requirements
+- Rust & Cargo
+- [Shuttle](https://docs.shuttle.rs/getting-started/installation)
+- Docker
 
-- [ ] Rendering chess boards
-- [ ] Making moves against boards
+## Local development and usage
+
+Run code checks:
+```bash
+make check
+```
+
+Run tests:
+```bash
+make test
+```
+
+Prepare SQLX queries:
+```bash
+./bin/queries.sh
+```
+
+Run locally:
+```bash
+./bin/run.sh
+```
+
+## Deployment
+
+You'll need to get an Api key if you want to deploy to [Shuttle.rs](https://console.shuttle.rs/). It's easy and free to get one :) 
+
+In order to deploy to Shuttle.rs run:
+```bash
+cargo shuttle deploy
+```
+Remember to ensure your repository isn't dirty, your code passes checks, and your migrations are properly version controlled!
+
+### CI/CD
+
+This repository comes with workflows for deploying to Shuttle.rs from GitHub. These will run on pushing to `main` if you set up the `SHUTTLE_API_KEY` secret for GitHub actions in your repository.

@@ -2,8 +2,7 @@
 
 set -o errexit
 
-export DATABASE_URL="postgres://postgres:postgres@localhost:5432/postgres"
-
+export DATABASE_URL=$(bin/postgres.sh database-url)
 make postgres
 
 sqlx database setup
