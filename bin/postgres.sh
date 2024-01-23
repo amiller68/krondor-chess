@@ -8,11 +8,18 @@ POSTGRES_VOLUME_NAME="krondor-chess-postgres-data"
 
 POSTGRES_ROOT_USER="postgres"
 POSTGRES_ROOT_PASSWORD="postgres"
+POSTGRES_DATABASE="krondor-chess-db"
+
+DATABASE_URL="postgres://${POSTGRES_ROOT_USER}:${POSTGRES_ROOT_PASSWORD}@localhost:5432/${POSTGRES_DATABASE}"
 
 CONTAINER_RUNTIME="podman"
 if which docker &>/dev/null; then
 	CONTAINER_RUNTIME="docker"
 fi
+
+function database-url {
+	echo ${DATABASE_URL}
+}
 
 function run {
 	start-postgres-container
@@ -41,7 +48,7 @@ function create-postgres-container {
 		--name ${POSTGRES_CONTAINER_NAME} \
 		--env POSTGRES_USER=${POSTGRES_ROOT_USER} \
 		--env POSTGRES_PASSWORD=${POSTGRES_ROOT_PASSWORD} \
-		--env POSTGRES_DB=postgres \
+		--env POSTGRES_DB=${POSTGRES_DATABASE} \
 		--publish 5432:5432 \
 		--volume ${POSTGRES_VOLUME_NAME}:/var/lib/postgresql/data \
 		--detach \

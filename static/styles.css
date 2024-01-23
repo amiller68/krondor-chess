@@ -9,3 +9,30 @@ table, th, td {
   border: 1px solid black;
 	padding: 0.25rem;
 }
+
+.chess-board {
+    border-collapse: collapse;
+    margin: auto; /* Center the board horizontally */
+}
+
+.chess-row {
+    height: 50px; /* Adjust the height of rows */
+}
+
+.chess-cell {
+    width: 50px; /* Adjust the width of cells */
+    height: 50px; /* Ensure cells are square */
+    text-align: center; /* Center the piece character */
+    vertical-align: middle; /* Align the character vertically */
+    font-size: 36px; /* Increase the size of the piece character */
+    font-weight: bold; /* Optional: Makes the piece character bold */
+    border: 1px solid #333; /* Adds a border to each cell */
+}
+
+.light-square {
+    background-color: #f0d9b5; /* Light color for light squares */
+}
+
+.dark-square {
+    background-color: #b58863; /* Dark color for dark squares */
+}
