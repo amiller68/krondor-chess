@@ -2,11 +2,17 @@
 
 {% block content %}
 <h1>Board</h1>
-
-{% let board_html = api_board.html() %}
-{% let board_id = api_board.id() %}
-<div id="board-{{ board_id }}">
+<script src="/static/js/board.js"></script>
+{% let board_html = api_board.board_html() %}
+{% let game_id = api_board.game_id() %}
+<div id="board-{{ game_id }}">
 	{{ board_html|safe }}
 </div>
+
+<!-- Hidden form for submitting moves -->
+<form id="moveForm" action="/games/{{ game_id }}" method="post" hx-target="#board-{{ game_id }}" hx-swap="innerHTML" style="display: none;">
+    <input type="hidden" id="uciMoveInput" name="uciMove">
+    <button type="submit" id="submitMove">Submit Move</button>
+</form>
 
 {% endblock %}
