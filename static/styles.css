@@ -15,11 +15,11 @@ table, th, td {
     margin: auto; /* Center the board horizontally */
 }
 
-.chess-row {
+.chess-rank {
     height: 50px; /* Adjust the height of rows */
 }
 
-.chess-cell {
+[class^="chess-square-"] {
     width: 50px; /* Adjust the width of cells */
     height: 50px; /* Ensure cells are square */
     text-align: center; /* Center the piece character */
@@ -29,10 +29,14 @@ table, th, td {
     border: 1px solid #333; /* Adds a border to each cell */
 }
 
-.light-square {
+.chess-square-light {
     background-color: #f0d9b5; /* Light color for light squares */
 }
 
-.dark-square {
+.chess-square-dark {
     background-color: #b58863; /* Dark color for dark squares */
+}
+
+.selected {
+    background-color: #ffff00;
 }
