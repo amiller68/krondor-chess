@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT\n                id as \"id: Uuid\",\n                current_fen_id as \"current_fen_id: Uuid\",\n                created_at as \"created_at: OffsetDateTime\",\n                updated_at as \"updated_at: OffsetDateTime\",\n                status as \"status: GameStatus\",\n                winner as \"winner: GameWinner\",\n                outcome as \"outcome: GameOutcome\"\n            FROM games\n            ",
+  "query": "INSERT INTO games DEFAULT VALUES RETURNING\n                id as \"id: Uuid\",\n                created_at as \"created_at: OffsetDateTime\",\n                updated_at as \"updated_at: OffsetDateTime\",\n                status as \"status: GameStatus\",\n                winner as \"winner: GameWinner\",\n                outcome as \"outcome: GameOutcome\"\n            ",
   "describe": {
     "columns": [
       {
@@ -10,31 +10,26 @@
       },
       {
         "ordinal": 1,
-        "name": "current_fen_id: Uuid",
-        "type_info": "Uuid"
-      },
-      {
-        "ordinal": 2,
         "name": "created_at: OffsetDateTime",
         "type_info": "Timestamp"
       },
       {
-        "ordinal": 3,
+        "ordinal": 2,
         "name": "updated_at: OffsetDateTime",
         "type_info": "Timestamp"
       },
       {
-        "ordinal": 4,
+        "ordinal": 3,
         "name": "status: GameStatus",
         "type_info": "Varchar"
       },
       {
-        "ordinal": 5,
+        "ordinal": 4,
         "name": "winner: GameWinner",
         "type_info": "Varchar"
       },
       {
-        "ordinal": 6,
+        "ordinal": 5,
         "name": "outcome: GameOutcome",
         "type_info": "Varchar"
       }
@@ -47,10 +42,9 @@
       false,
       false,
       false,
-      false,
       true,
       true
     ]
   },
-  "hash": "373f64ffad0cbebf7b1809f605b93126dd303aa85537a5fa09997c6c59d41c6d"
+  "hash": "17602c73cd0bf74a20007c7b9e1b8ed3809ccd439f4f4eff0216b4aba1021bc1"
 }
