@@ -31,6 +31,10 @@ clippy:
 postgres:
 	./bin/postgres.sh run
 
+.PHONY: postgres-clean
+postgres-clean:
+	./bin/postgres.sh clean
+
 .PHONY: test
 test:
 	cargo test --all --workspace --bins --tests --benches

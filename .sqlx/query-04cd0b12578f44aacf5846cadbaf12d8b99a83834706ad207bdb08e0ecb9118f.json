@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT board as \"board: Board\"\n            FROM positions\n            JOIN moves ON moves.position_id = positions.id\n            JOIN games ON games.id = moves.game_id\n            WHERE games.id = $1\n            ORDER BY moves.move_number DESC\n            LIMIT 1\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "board: Board",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "04cd0b12578f44aacf5846cadbaf12d8b99a83834706ad207bdb08e0ecb9118f"
+}

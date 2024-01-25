@@ -25,7 +25,7 @@ impl AppState {
 #[shuttle_runtime::main]
 async fn main(
     #[shuttle_shared_db::Postgres(
-        local_uri = "postgres://postgres:postgres@localhost:5432/postgres"
+        local_uri = "postgres://postgres:postgres@localhost:5432/krondor-chess-db"
     )]
     db: PgPool,
 ) -> shuttle_axum::ShuttleAxum {
@@ -51,7 +51,7 @@ async fn main(
         )
         .route(
             "/games/:game_id",
-            get(api::games::board::read_board::handler),
+            get(api::games::read_game::handler).post(api::games::make_move::handler),
         )
         .with_state(state)
         // Static assets
