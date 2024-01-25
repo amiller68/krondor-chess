@@ -94,11 +94,20 @@ impl Game {
         // Insert the FEN into the database if it doesn't already exist
         // Return the position ID
         let board_fen = board.fen();
-
+        // TODO: this is super gross, but I can't figure out how to do this in one query
         let position_id = sqlx::query_scalar!(
-            r#"INSERT INTO positions (board)
-            VALUES ($1)
-            RETURNING id as "id: Uuid"
+            r#"
+            WITH attempted_insert AS (
+                INSERT INTO positions (board)
+                VALUES ($1)
+                ON CONFLICT (board)
+                DO NOTHING
+                RETURNING id
+            )
+            SELECT id FROM attempted_insert
+            UNION ALL
+            SELECT id as "id: Uuid" FROM positions WHERE board = $1
+            LIMIT 1;
             "#,
             board_fen,
         )

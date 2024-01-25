@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            WITH attempted_insert AS (\n                INSERT INTO positions (board)\n                VALUES ($1)\n                ON CONFLICT (board)\n                DO NOTHING\n                RETURNING id\n            )\n            SELECT id FROM attempted_insert\n            UNION ALL\n            SELECT id as \"id: Uuid\" FROM positions WHERE board = $1\n            LIMIT 1;\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "d2f10656fa68f33b31b56ffe52c858873151ff7bedfe2bc093dabf2f52987e6d"
+}
