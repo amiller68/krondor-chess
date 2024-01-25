@@ -52,6 +52,14 @@ impl Game {
         &self.status
     }
 
+    pub fn winner(&self) -> &Option<GameWinner> {
+        &self.winner
+    }
+
+    pub fn outcome(&self) -> &Option<GameOutcome> {
+        &self.outcome
+    }
+
     // TODO: make the state machine more robust -- but maybe eventually this will
     //  check if a user has access to a game
     /// Check if a game exists in the database
@@ -75,6 +83,7 @@ impl Game {
                 winner as "winner: GameWinner",
                 outcome as "outcome: GameOutcome"
             FROM games
+            ORDER BY created_at DESC
             "#,
         )
         .fetch_all(&mut *conn)
@@ -97,6 +106,18 @@ impl GameBoard {
     // Getters
     pub fn board(&self) -> &Board {
         &self.board
+    }
+
+    pub fn status(&self) -> &GameStatus {
+        &self.status
+    }
+
+    pub fn winner(&self) -> &Option<GameWinner> {
+        &self.winner
+    }
+
+    pub fn outcome(&self) -> &Option<GameOutcome> {
+        &self.outcome
     }
 
     /* Database Operations */
@@ -142,14 +163,12 @@ impl GameBoard {
         uci_move: &str,
         resign: bool,
     ) -> Result<Self, GameError> {
-        let game = GameBoard::latest(conn, game_id).await?;
+        let game = Self::latest(conn, game_id).await?;
 
-        // If the game is already over, return an error
-        if game.status != GameStatus::Active {
-            return Err(GameError::InvalidMove(
-                uci_move.to_string(),
-                game.board().clone(),
-            ));
+        // TODO: I don't like that this isn't an explicit error
+        // If the game is already over, just return it
+        if game.status == GameStatus::Complete {
+            return Ok(game);
         }
 
         let mut board = game.board().clone();
@@ -189,10 +208,12 @@ impl GameBoard {
 
         let move_number = board.moves_played() as i32;
 
+        // TODO: I don't like that this isn't an explicit error
         // Attempt to make the move on the board
         let success = board.apply_uci_move(uci_move);
         if !success {
-            return Err(GameError::InvalidMove(uci_move.to_string(), board.clone()));
+            return Ok(game);
+            // return Err(GameError::InvalidMove(uci_move.to_string(), board.clone()));
         }
 
         // Insert the FEN into the database if it doesn't already exist
@@ -314,6 +335,6 @@ impl GameBoard {
 pub enum GameError {
     #[error("sqlx error: {0}")]
     Sqlx(#[from] sqlx::Error),
-    #[error("invalid move: {0} on board {1}")]
-    InvalidMove(String, Board),
+    // #[error("invalid move: {0} on board {1}")]
+    // InvalidMove(String, Board),
 }

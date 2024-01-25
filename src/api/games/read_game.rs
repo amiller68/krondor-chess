@@ -5,7 +5,7 @@ use axum::{
 };
 use sqlx::types::Uuid;
 
-use crate::api::models::ApiBoard;
+use crate::api::models::ApiGameBoard;
 use crate::database::models::{Game, GameBoard, GameError};
 use crate::AppState;
 
@@ -19,18 +19,21 @@ pub async fn handler(
     }
     let game_board = GameBoard::latest(&mut conn, game_id).await?;
     let board = game_board.board().clone();
-    let api_board = ApiBoard {
+    let api_board = ApiGameBoard {
         board,
+        status: game_board.status().clone(),
+        winner: game_board.winner().clone(),
+        outcome: game_board.outcome().clone(),
         game_id: game_id.to_string(),
     };
 
-    Ok(TemplateApiBoard { api_board })
+    Ok(TemplateApiGameBoard { api_board })
 }
 
 #[derive(Template)]
 #[template(path = "board.html")]
-struct TemplateApiBoard {
-    api_board: ApiBoard,
+struct TemplateApiGameBoard {
+    api_board: ApiGameBoard,
 }
 
 #[derive(Debug, thiserror::Error)]

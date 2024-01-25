@@ -6,7 +6,7 @@ use axum::{
 };
 use sqlx::types::Uuid;
 
-use crate::api::models::ApiBoard;
+use crate::api::models::ApiGameBoard;
 use crate::database::models::{Game, GameBoard, GameError};
 use crate::AppState;
 
@@ -28,30 +28,34 @@ pub async fn handler(
     if !Game::exists(&mut conn, game_id).await? {
         return Err(ReadBoardError::NotFound);
     }
-    let maybe_game_board = GameBoard::make_move(&mut conn, game_id, &uci_move, resign).await;
-    let board = match maybe_game_board {
-        Ok(game_board) => game_board.board().clone(),
-        Err(e) => match e {
-            GameError::InvalidMove(_, board) => board,
-            _ => return Err(e.into()),
-        },
-    };
+
+    // Returns the updated board if the move was valid. Otherwise, returns the latest board.
+    let game_board = GameBoard::make_move(&mut conn, game_id, &uci_move, resign).await?;
+
     // If we got here, then either we made a valid move
     //  or no changes were made to the database (invalid move)
     conn.commit().await?;
 
-    let api_board = ApiBoard {
+    let board = game_board.board().clone();
+    let status = game_board.status().clone();
+    let winner = game_board.winner().clone();
+    let outcome = game_board.outcome().clone();
+    let game_id = game_id.to_string();
+    let api_board = ApiGameBoard {
+        game_id,
         board,
-        game_id: game_id.to_string(),
+        status,
+        winner,
+        outcome,
     };
 
-    Ok(TemplateApiBoard { api_board })
+    Ok(TemplateApiGameBoard { api_board })
 }
 
 #[derive(Template)]
 #[template(path = "board.html")]
-struct TemplateApiBoard {
-    api_board: ApiBoard,
+struct TemplateApiGameBoard {
+    api_board: ApiGameBoard,
 }
 
 #[derive(Debug, thiserror::Error)]
