@@ -6,7 +6,7 @@ use axum::{
 use sqlx::types::Uuid;
 
 use crate::api::models::ApiBoard;
-use crate::database::models::{Game, GameError};
+use crate::database::models::{Game, GameBoard, GameError};
 use crate::AppState;
 
 pub async fn handler(
@@ -14,7 +14,11 @@ pub async fn handler(
     Path(game_id): Path<Uuid>,
 ) -> Result<impl IntoResponse, ReadBoardError> {
     let mut conn = state.database().acquire().await?;
-    let board = Game::latest_board(&mut conn, game_id).await?;
+    if !Game::exists(&mut conn, game_id).await? {
+        return Err(ReadBoardError::NotFound);
+    }
+    let game_board = GameBoard::latest(&mut conn, game_id).await?;
+    let board = game_board.board().clone();
     let api_board = ApiBoard {
         board,
         game_id: game_id.to_string(),
@@ -35,11 +39,21 @@ pub enum ReadBoardError {
     Sqlx(#[from] sqlx::Error),
     #[error("game error: {0}")]
     Game(#[from] GameError),
+    #[error("game not found")]
+    NotFound,
 }
 
 impl IntoResponse for ReadBoardError {
     fn into_response(self) -> Response {
-        let body = format!("{}", self);
-        (axum::http::StatusCode::INTERNAL_SERVER_ERROR, body).into_response()
+        match self {
+            ReadBoardError::NotFound => {
+                let body = format!("{}", self);
+                (axum::http::StatusCode::NOT_FOUND, body).into_response()
+            }
+            _ => {
+                let body = format!("{}", self);
+                (axum::http::StatusCode::INTERNAL_SERVER_ERROR, body).into_response()
+            }
+        }
     }
 }

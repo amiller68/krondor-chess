@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE games\n                SET winner = $1,\n                    status = $2,\n                    outcome = $3\n                WHERE id = $4\n                ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Varchar",
+        "Varchar",
+        "Varchar",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "f6c504d520f8beb954363630588c10e6f5a9cd27f331a7b4af45056113fb3b74"
+}

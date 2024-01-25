@@ -14,5 +14,10 @@
     <input type="hidden" id="uciMoveInput" name="uciMove">
     <button type="submit" id="submitMove">Submit Move</button>
 </form>
+<form id="resignForm" action="/games/{{ game_id }}" method="post" hx-target="#board-{{ game_id }}" hx-swap="innerHTML" style="display: block;">
+    <input type="hidden" id="uciMoveInput" name="uciMove">
+    <input type="hidden" id="resignInput" name="resign" value="true">
+    <button type="submit" id="submitResign">Resign</button>
+</form>
 
 {% endblock %}
