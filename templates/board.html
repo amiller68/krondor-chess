@@ -2,17 +2,37 @@
 
 {% block content %}
 <h1>Board</h1>
+<nav>
+    <a href="/">Games</a>
+</nav>
 <script src="/static/js/board.js"></script>
 {% let board_html = api_board.board_html() %}
 {% let game_id = api_board.game_id() %}
+
 <div id="board-{{ game_id }}">
+    <!-- If the game is 'complete', then don't show the board -->
+    {% if api_board.status() == "complete" %}
+        <p>Game over!</p>
+        <p>Winner: {{ api_board.winner() }}</p>
+        <p>Outcome: {{ api_board.outcome() }}</p>
+    {% else %}
+        <p>Turn: {{ api_board.turn() }}</p>
+    {% endif %}
+
 	{{ board_html|safe }}
 </div>
 
-<!-- Hidden form for submitting moves -->
 <form id="moveForm" action="/games/{{ game_id }}" method="post" hx-target="#board-{{ game_id }}" hx-swap="innerHTML" style="display: none;">
     <input type="hidden" id="uciMoveInput" name="uciMove">
     <button type="submit" id="submitMove">Submit Move</button>
 </form>
+
+{% if api_board.status() == "active" %}
+<form id="resignForm" action="/games/{{ game_id }}" method="post" hx-target="#board-{{ game_id }}" hx-swap="innerHTML" style="display: block;">
+    <input type="hidden" id="uciMoveInput" name="uciMove">
+    <input type="hidden" id="resignInput" name="resign" value="true">
+    <button type="submit" id="submitResign">Resign</button>
+</form>
+{% endif %}
 
 {% endblock %}

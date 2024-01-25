@@ -6,14 +6,15 @@ use axum::{
 };
 use sqlx::types::Uuid;
 
-use crate::api::models::ApiBoard;
-use crate::database::models::{Game, GameError};
+use crate::api::models::ApiGameBoard;
+use crate::database::models::{Game, GameBoard, GameError};
 use crate::AppState;
 
 #[derive(serde::Deserialize)]
 pub struct MakeMoveRequest {
     #[serde(rename = "uciMove")]
     uci_move: String,
+    resign: Option<bool>,
 }
 
 pub async fn handler(
@@ -22,31 +23,39 @@ pub async fn handler(
     Form(request): Form<MakeMoveRequest>,
 ) -> Result<impl IntoResponse, ReadBoardError> {
     let uci_move = request.uci_move;
+    let resign = request.resign.unwrap_or(false);
     let mut conn = state.database().begin().await?;
-    let maybe_board = Game::make_move(&mut conn, game_id, &uci_move).await;
-    let board = match maybe_board {
-        Ok(board) => board,
-        Err(e) => match e {
-            GameError::InvalidMove(_, board) => board,
-            _ => return Err(e.into()),
-        },
-    };
+    if !Game::exists(&mut conn, game_id).await? {
+        return Err(ReadBoardError::NotFound);
+    }
+
+    // Returns the updated board if the move was valid. Otherwise, returns the latest board.
+    let game_board = GameBoard::make_move(&mut conn, game_id, &uci_move, resign).await?;
+
     // If we got here, then either we made a valid move
     //  or no changes were made to the database (invalid move)
     conn.commit().await?;
 
-    let api_board = ApiBoard {
+    let board = game_board.board().clone();
+    let status = game_board.status().clone();
+    let winner = game_board.winner().clone();
+    let outcome = game_board.outcome().clone();
+    let game_id = game_id.to_string();
+    let api_board = ApiGameBoard {
+        game_id,
         board,
-        game_id: game_id.to_string(),
+        status,
+        winner,
+        outcome,
     };
 
-    Ok(TemplateApiBoard { api_board })
+    Ok(TemplateApiGameBoard { api_board })
 }
 
 #[derive(Template)]
 #[template(path = "board.html")]
-struct TemplateApiBoard {
-    api_board: ApiBoard,
+struct TemplateApiGameBoard {
+    api_board: ApiGameBoard,
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -55,11 +64,21 @@ pub enum ReadBoardError {
     Sqlx(#[from] sqlx::Error),
     #[error("game error: {0}")]
     Game(#[from] GameError),
+    #[error("game not found")]
+    NotFound,
 }
 
 impl IntoResponse for ReadBoardError {
     fn into_response(self) -> Response {
-        let body = format!("{}", self);
-        (axum::http::StatusCode::INTERNAL_SERVER_ERROR, body).into_response()
+        match self {
+            ReadBoardError::NotFound => {
+                let body = format!("{}", self);
+                (axum::http::StatusCode::NOT_FOUND, body).into_response()
+            }
+            _ => {
+                let body = format!("{}", self);
+                (axum::http::StatusCode::INTERNAL_SERVER_ERROR, body).into_response()
+            }
+        }
     }
 }

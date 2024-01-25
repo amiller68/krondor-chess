@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE games\n            SET status = 'active'\n            WHERE id = $1\n            AND status = 'created'\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "c1037eca08ec19e80f8ad23cee76acfc1e63248600b92160dd74488a60012699"
+}

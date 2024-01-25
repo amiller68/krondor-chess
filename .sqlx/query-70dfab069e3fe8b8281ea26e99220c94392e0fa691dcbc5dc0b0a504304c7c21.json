@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT\n                id as \"id: Uuid\",\n                created_at as \"created_at: OffsetDateTime\",\n                updated_at as \"updated_at: OffsetDateTime\",\n                status as \"status: GameStatus\",\n                winner as \"winner: GameWinner\",\n                outcome as \"outcome: GameOutcome\"\n            FROM games\n            ",
+  "query": "SELECT\n                id as \"id: Uuid\",\n                created_at as \"created_at: OffsetDateTime\",\n                updated_at as \"updated_at: OffsetDateTime\",\n                status as \"status: GameStatus\",\n                winner as \"winner: GameWinner\",\n                outcome as \"outcome: GameOutcome\"\n            FROM games\n            ORDER BY created_at DESC\n            ",
   "describe": {
     "columns": [
       {
@@ -46,5 +46,5 @@
       true
     ]
   },
-  "hash": "b7b72db08aa367a47d6416be39acb4277dcc5a9111394da19fac399942254b85"
+  "hash": "70dfab069e3fe8b8281ea26e99220c94392e0fa691dcbc5dc0b0a504304c7c21"
 }

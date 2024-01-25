@@ -1,0 +1,46 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT\n                g.id as \"id: Uuid\",\n                p.board as \"board: Board\",\n                g.status as \"status: GameStatus\",\n                g.winner as \"winner: GameWinner\",\n                g.outcome as \"outcome: GameOutcome\"\n            FROM positions as p\n            JOIN moves as m ON m.position_id = p.id\n            JOIN games as g ON g.id = m.game_id\n            WHERE g.id = $1\n            ORDER BY m.move_number DESC\n            LIMIT 1\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id: Uuid",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "board: Board",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "status: GameStatus",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "winner: GameWinner",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "outcome: GameOutcome",
+        "type_info": "Varchar"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      true
+    ]
+  },
+  "hash": "d0646f52e0a1e1a39a2a7f5c675198f2fe7d7ab2e85f380e1536b7a8fb37c24c"
+}

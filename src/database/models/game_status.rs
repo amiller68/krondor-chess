@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 pub enum GameStatus {
     Created,
     Active,
-    Completed,
+    Complete,
     Abandoned,
 }
 
@@ -17,7 +17,7 @@ impl Display for GameStatus {
         match self {
             GameStatus::Created => write!(f, "created"),
             GameStatus::Active => write!(f, "active"),
-            GameStatus::Completed => write!(f, "completed"),
+            GameStatus::Complete => write!(f, "complete"),
             GameStatus::Abandoned => write!(f, "abandoned"),
         }
     }
@@ -30,7 +30,7 @@ impl TryFrom<&str> for GameStatus {
         match value {
             "created" => Ok(GameStatus::Created),
             "active" => Ok(GameStatus::Active),
-            "completed" => Ok(GameStatus::Completed),
+            "complete" => Ok(GameStatus::Complete),
             "abandoned" => Ok(GameStatus::Abandoned),
             _ => Err(GameStatusError::InvalidGameStatus),
         }
