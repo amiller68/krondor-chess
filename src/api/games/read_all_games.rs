@@ -4,7 +4,7 @@ use axum::{
     response::{IntoResponse, Response},
 };
 
-use crate::api::models::ApiGame;
+use crate::api::models::ApiGameItem;
 use crate::database::models::{Game, GameError};
 use crate::AppState;
 
@@ -13,14 +13,14 @@ pub async fn handler(
 ) -> Result<impl IntoResponse, ReadAllGamesError> {
     let mut conn = state.database().acquire().await?;
     let games = Game::read_all(&mut conn).await?;
-    let api_games = games.into_iter().map(ApiGame::from).collect();
-    Ok(Records { api_games })
+    let game_items = games.into_iter().map(ApiGameItem::from).collect();
+    Ok(GameList { game_items })
 }
 
 #[derive(Template)]
-#[template(path = "games.html")]
-struct Records {
-    api_games: Vec<ApiGame>,
+#[template(path = "game_list.html")]
+struct GameList {
+    game_items: Vec<ApiGameItem>,
 }
 
 #[derive(Debug, thiserror::Error)]

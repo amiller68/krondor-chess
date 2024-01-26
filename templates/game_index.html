@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>Board</h1>
+<nav>
+    <a href="/">Games</a>
+</nav>
+<!-- HTMX SSE -->
+<script src="https://unpkg.com/htmx.org/dist/ext/sse.js"></script>
+{% let game_id = api_game_board.game_id() %}
+
+<div hx-ext="sse" sse-connect="/games/{{ game_id }}/sse">
+    <!-- Note: the `board-{{ game_id }}` id is used as the target for the SSE event. It should appear in the rendered HTML -->
+    <div hx-get="/games/{{ game_id }}/board" hx-trigger="sse:game-update-{{ game_id }}">
+        <!-- The struct used to render the board is the same as the one used in the game_index.html template -->
+        <!-- Render the template withing a game_board by including the game_board.html template -->
+        {% include "game_board.html" %}
+    </div>
+</div>
+
+{% endblock %}

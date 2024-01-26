@@ -1,5 +1,4 @@
-<!-- templates/games.html -->
-<div id="games">
+<div id="game-list">
 <table>
     <thead>
         <tr>
@@ -9,9 +8,9 @@
             <th>Winner</th>
         </tr>
     </thead>
-    <tbody id="games-content">
-        {% for api_game in api_games %}
-            {% include "game.html" %}
+    <tbody id="game-list-content">
+        {% for game_item in game_items %}
+            {% include "game_item.html" %}
         {% endfor %}
     </tbody>
 </table>

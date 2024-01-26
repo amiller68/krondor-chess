@@ -1,2 +1,2 @@
 pub mod games;
-mod models;
+pub mod models;

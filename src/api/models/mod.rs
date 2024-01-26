@@ -1,5 +1,5 @@
-mod api_board;
-mod api_game;
+mod api_game_board;
+mod api_game_item;
 
-pub use api_board::ApiGameBoard;
-pub use api_game::ApiGame;
+pub use api_game_board::ApiGameBoard;
+pub use api_game_item::ApiGameItem;
