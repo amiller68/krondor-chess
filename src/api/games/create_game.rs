@@ -4,21 +4,23 @@ use axum::{
     response::{IntoResponse, Response},
 };
 
-use crate::api::models::ApiGame;
+use crate::api::models::ApiGameItem;
 use crate::database::models::NewGame;
 use crate::AppState;
 
 pub async fn handler(State(state): State<AppState>) -> Result<impl IntoResponse, CreateGameError> {
     let game = NewGame::create(&state.database()).await?;
 
-    let api_game = ApiGame::from(game);
-    Ok(NewGameTemplate { api_game })
+    let api_game = ApiGameItem::from(game);
+    Ok(GameItemTemplate {
+        game_item: api_game,
+    })
 }
 
 #[derive(Template)]
-#[template(path = "game.html")]
-struct NewGameTemplate {
-    api_game: ApiGame,
+#[template(path = "game_item.html")]
+struct GameItemTemplate {
+    game_item: ApiGameItem,
 }
 
 #[derive(Debug, thiserror::Error)]

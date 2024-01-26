@@ -20,13 +20,15 @@ pub async fn handler(
 
     let game_board = GameBoard::latest(&mut conn, game_id).await?;
 
+    tracing::info!("read game board: {:?}", game_board);
+
     let api_game_board = ApiGameBoard::from(game_board);
 
     Ok(TemplateApiGameBoard { api_game_board })
 }
 
 #[derive(Template)]
-#[template(path = "game_index.html")]
+#[template(path = "game_board.html")]
 struct TemplateApiGameBoard {
     api_game_board: ApiGameBoard,
 }

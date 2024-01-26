@@ -104,6 +104,10 @@ pub struct GameBoard {
 
 impl GameBoard {
     // Getters
+    pub fn id(&self) -> Uuid {
+        self.id
+    }
+
     pub fn board(&self) -> &Board {
         &self.board
     }
@@ -162,13 +166,12 @@ impl GameBoard {
         game_id: Uuid,
         uci_move: &str,
         resign: bool,
-    ) -> Result<Self, GameError> {
+    ) -> Result<(), GameError> {
         let game = Self::latest(conn, game_id).await?;
 
-        // TODO: I don't like that this isn't an explicit error
         // If the game is already over, just return it
         if game.status == GameStatus::Complete {
-            return Ok(game);
+            return Err(GameError::GameComplete);
         }
 
         let mut board = game.board().clone();
@@ -197,13 +200,7 @@ impl GameBoard {
             )
             .execute(&mut *conn)
             .await?;
-            return Ok(Self {
-                id: game_id,
-                board: board.clone(),
-                status: game_status,
-                winner: Some(game_winner),
-                outcome: Some(game_outcome),
-            });
+            return Ok(());
         }
 
         let move_number = board.moves_played() as i32;
@@ -212,8 +209,7 @@ impl GameBoard {
         // Attempt to make the move on the board
         let success = board.apply_uci_move(uci_move);
         if !success {
-            return Ok(game);
-            // return Err(GameError::InvalidMove(uci_move.to_string(), board.clone()));
+            return Err(GameError::InvalidMove(uci_move.to_string()));
         }
 
         // Insert the FEN into the database if it doesn't already exist
@@ -273,13 +269,7 @@ impl GameBoard {
             )
             .execute(&mut *conn)
             .await?;
-            return Ok(Self {
-                id: game_id,
-                board: board.clone(),
-                status: game_status,
-                winner: Some(game_winner),
-                outcome: Some(game_outcome),
-            });
+            return Ok(());
         } else if board.stalemate() {
             let game_winner = GameWinner::Draw;
             let game_outcome = GameOutcome::Stalemate;
@@ -298,13 +288,7 @@ impl GameBoard {
             )
             .execute(&mut *conn)
             .await?;
-            return Ok(Self {
-                id: game_id,
-                board: board.clone(),
-                status: game_status,
-                winner: Some(game_winner),
-                outcome: Some(game_outcome),
-            });
+            return Ok(());
         }
 
         // TODO: find a better way to do this -- maybe there will be an 'accept' game worflow in the future
@@ -321,13 +305,7 @@ impl GameBoard {
         .await?;
 
         // Return the updated board
-        Ok(Self {
-            id: game_id,
-            board: board.clone(),
-            status: GameStatus::Active,
-            winner: None,
-            outcome: None,
-        })
+        Ok(())
     }
 }
 
@@ -335,6 +313,8 @@ impl GameBoard {
 pub enum GameError {
     #[error("sqlx error: {0}")]
     Sqlx(#[from] sqlx::Error),
-    // #[error("invalid move: {0} on board {1}")]
-    // InvalidMove(String, Board),
+    #[error("invalid move: {0}")]
+    InvalidMove(String),
+    #[error("game already complete")]
+    GameComplete,
 }

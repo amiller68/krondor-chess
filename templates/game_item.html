@@ -1,0 +1,8 @@
+<!-- templates/game.html -->
+<tr id="game-{{ game_item.id() }}">
+    <td> <a href="/games/{{ game_item.id() }}">{{ game_item.id() }}</a> </td>
+    <td> {{ game_item.status() }} </td>
+    <td> {{ game_item.outcome() }} </td>
+    <td> {{ game_item.winner() }} </td>
+</tr>
+

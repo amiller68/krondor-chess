@@ -1,16 +1,17 @@
-use askama::Template;
 use axum::{
     extract::{Path, State},
+    http::StatusCode,
     response::{IntoResponse, Response},
-    Form,
+    Extension, Form,
 };
 use sqlx::types::Uuid;
 
-use crate::api::models::ApiGameBoard;
 use crate::database::models::{Game, GameBoard, GameError};
 use crate::AppState;
 
-#[derive(serde::Deserialize)]
+use super::watch_game_sse::{GameUpdate, GameUpdateStream};
+
+#[derive(serde::Deserialize, Debug)]
 pub struct MakeMoveRequest {
     #[serde(rename = "uciMove")]
     uci_move: String,
@@ -19,6 +20,7 @@ pub struct MakeMoveRequest {
 
 pub async fn handler(
     State(state): State<AppState>,
+    Extension(tx): Extension<GameUpdateStream>,
     Path(game_id): Path<Uuid>,
     Form(request): Form<MakeMoveRequest>,
 ) -> Result<impl IntoResponse, ReadBoardError> {
@@ -30,32 +32,15 @@ pub async fn handler(
     }
 
     // Returns the updated board if the move was valid. Otherwise, returns the latest board.
-    let game_board = GameBoard::make_move(&mut conn, game_id, &uci_move, resign).await?;
+    GameBoard::make_move(&mut conn, game_id, &uci_move, resign).await?;
 
-    // If we got here, then either we made a valid move
-    //  or no changes were made to the database (invalid move)
     conn.commit().await?;
 
-    let board = game_board.board().clone();
-    let status = game_board.status().clone();
-    let winner = game_board.winner().clone();
-    let outcome = game_board.outcome().clone();
-    let game_id = game_id.to_string();
-    let api_board = ApiGameBoard {
-        game_id,
-        board,
-        status,
-        winner,
-        outcome,
-    };
+    if tx.send(GameUpdate).is_err() {
+        tracing::warn!("failed to send game update: game_id={}", game_id);
+    }
 
-    Ok(TemplateApiGameBoard { api_board })
-}
-
-#[derive(Template)]
-#[template(path = "board.html")]
-struct TemplateApiGameBoard {
-    api_board: ApiGameBoard,
+    Ok(StatusCode::OK)
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -75,6 +60,16 @@ impl IntoResponse for ReadBoardError {
                 let body = format!("{}", self);
                 (axum::http::StatusCode::NOT_FOUND, body).into_response()
             }
+            ReadBoardError::Game(e) => match e {
+                GameError::InvalidMove(_) | GameError::GameComplete => {
+                    let body = format!("{}", e);
+                    (axum::http::StatusCode::BAD_REQUEST, body).into_response()
+                }
+                _ => {
+                    let body = format!("internal server error: {}", e);
+                    (axum::http::StatusCode::INTERNAL_SERVER_ERROR, body).into_response()
+                }
+            },
             _ => {
                 let body = format!("{}", self);
                 (axum::http::StatusCode::INTERNAL_SERVER_ERROR, body).into_response()
