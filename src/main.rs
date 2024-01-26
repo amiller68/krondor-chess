@@ -26,7 +26,7 @@ impl AppState {
 #[shuttle_runtime::main]
 async fn main(
     #[shuttle_shared_db::Postgres(
-        local_uri = &std::env::var("DATABASE_URL").expect("DATABASE_URL must be set") 
+        local_uri = &std::env::var("DATABASE_URL").unwrap_or_else(|_| "postgres://localhost:5432".to_string()),
     )]
     db: PgPool,
 ) -> shuttle_axum::ShuttleAxum {
