@@ -1,7 +1,8 @@
 use askama::Template;
+use axum::Extension;
 use axum::{response::IntoResponse, routing::get, Router};
 use sqlx::PgPool;
-
+use tokio::sync::broadcast::channel;
 use tower_http::services::ServeDir;
 
 mod api;
@@ -25,7 +26,7 @@ impl AppState {
 #[shuttle_runtime::main]
 async fn main(
     #[shuttle_shared_db::Postgres(
-        local_uri = "postgres://postgres:postgres@localhost:5432/krondor-chess-db"
+        local_uri = &std::env::var("DATABASE_URL").expect("DATABASE_URL must be set") 
     )]
     db: PgPool,
 ) -> shuttle_axum::ShuttleAxum {
@@ -36,6 +37,7 @@ async fn main(
         .expect("Looks like something went wrong with migrations :(");
     // Setup State
     let state = AppState::new(db);
+    let (tx, _rx) = channel::<api::games::watch_game_sse::GameUpdate>(10);
 
     // Register panics as they happen
     register_panic_logger();
@@ -53,7 +55,16 @@ async fn main(
             "/games/:game_id",
             get(api::games::read_game::handler).post(api::games::make_move::handler),
         )
+        .route(
+            "/games/:game_id/sse",
+            get(api::games::watch_game_sse::handler),
+        )
+        .route(
+            "/games/:game_id/board",
+            get(api::games::read_game_board::handler),
+        )
         .with_state(state)
+        .layer(Extension(tx))
         // Static assets
         .nest_service("/static", ServeDir::new("static"));
 

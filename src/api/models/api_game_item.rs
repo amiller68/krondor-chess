@@ -3,14 +3,14 @@ use crate::database::models::GameOutcome;
 use crate::database::models::GameStatus;
 use crate::database::models::GameWinner;
 
-pub struct ApiGame {
+pub struct ApiGameItem {
     id: String,
     status: GameStatus,
     winner: Option<GameWinner>,
     outcome: Option<GameOutcome>,
 }
 
-impl ApiGame {
+impl ApiGameItem {
     pub fn id(&self) -> &str {
         &self.id
     }
@@ -34,7 +34,7 @@ impl ApiGame {
     }
 }
 
-impl From<Game> for ApiGame {
+impl From<Game> for ApiGameItem {
     fn from(game: Game) -> Self {
         Self {
             id: game.id().to_string(),

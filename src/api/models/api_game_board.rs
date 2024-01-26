@@ -2,6 +2,7 @@ use pleco::core::sq::SQ as Sq;
 use pleco::core::Piece;
 use pleco::core::Player;
 
+use crate::database::models::GameBoard;
 use crate::database::models::GameOutcome;
 use crate::database::models::GameStatus;
 use crate::database::models::GameWinner;
@@ -13,6 +14,18 @@ pub struct ApiGameBoard {
     pub status: GameStatus,
     pub winner: Option<GameWinner>,
     pub outcome: Option<GameOutcome>,
+}
+
+impl From<GameBoard> for ApiGameBoard {
+    fn from(game_board: GameBoard) -> Self {
+        Self {
+            game_id: game_board.id().to_string(),
+            board: game_board.board().clone(),
+            status: game_board.status().clone(),
+            winner: game_board.winner().clone(),
+            outcome: game_board.outcome().clone(),
+        }
+    }
 }
 
 impl ApiGameBoard {

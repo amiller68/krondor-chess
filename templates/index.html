@@ -2,8 +2,12 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Games</h1>
-<button hx-post="/games" hx-trigger="click" hx-target="#games-content" hx-swap="beforeend">New Game</button>
+<h1>Welcome to Krondor Chess!</h1>
+
+<p>Take a peek at some of the games currently being played, or creata a new one!</p>
+
+<!-- Note #game-list-content is a target within the 'game_list.html' template -->
+<button hx-post="/games" hx-trigger="click" hx-target="#game-list-content" hx-swap="beforeend">New Game</button>
 <div id="games-list" hx-get="/games" hx-target="this" hx-trigger="load" hx-swap="outerHTML">
 	Loading...
 </div>
