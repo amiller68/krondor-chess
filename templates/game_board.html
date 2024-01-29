@@ -1,31 +1,32 @@
-<!-- Our vanilla js for the board -->
-<div id="board-{{ game_id }}">
-    <script src="/static/js/board.js"></script>
-
+<div id="board-{{ api_game_board.game_id() }}">
     {% let board_html = api_game_board.board_html() %}
     {% let game_id = api_game_board.game_id() %}
-        <!-- If the game is 'complete', then don't show the board -->
-        {% if api_game_board.status() == "complete" %}
-            <p>Game over!</p>
-            <p>Winner: {{ api_game_board.winner() }}</p>
-            <p>Outcome: {{ api_game_board.outcome() }}</p>
-        {% else %}
-            <p>Turn: {{ api_game_board.turn() }}</p>
-        {% endif %}
 
-        {{ board_html|safe }}
+    {% if api_game_board.status() == "complete" %}
+        <p>Game over!</p>
+        <p>Winner: {{ api_game_board.winner() }}</p>
+        <p>Outcome: {{ api_game_board.outcome() }}</p>
+    {% else %}
+        <p>Turn: {{ api_game_board.turn() }}</p>
+    {% endif %}
 
-    {% if api_game_board.status() == "active" %}
+    {{ board_html|safe }}
+
+    <!-- Note: created is a catch-all status for games that are not active or complete -->
+    <!--  This will be relevant in future iterations of the game. For now don't remove this conditional -->
+    {% if api_game_board.status() == "active" || api_game_board.status() == "created" %}
     <form id="moveForm" style="display: none;">
         <input type="hidden" id="uciMoveInput" name="uciMove">
-        <!-- Submit without updating content -->
+        <!-- Submit without updating content, our stream will update the board -->
         <button hx-post="/games/{{ game_id }}" hx-trigger="click" hx-target="#board-{{ game_id }}" hx-swap="none" type="submit" id="submitMove">Submit Move</button>
     </form>
+    {% endif %}
 
+    {% if api_game_board.status() == "active" %}
     <form id="resignForm" style="display: block;">
         <input type="hidden" id="uciMoveInput" name="uciMove">
         <input type="hidden" id="resignInput" name="resign" value="true">
-        <!-- Submit without updating content -->
+        <!-- Submit without updating content, our stream will update the board -->
         <button hx-post="/games/{{ game_id }}" hx-trigger="click" hx-target="#board-{{ game_id }}" hx-swap="none" type="submit" id="submitResign">Resign</button>
     </form>
     {% endif %}
