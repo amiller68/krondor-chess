@@ -1,4 +1,3 @@
-use askama::Template;
 use axum::{
     extract::{Path, State},
     response::{IntoResponse, Response},
@@ -6,6 +5,7 @@ use axum::{
 use sqlx::types::Uuid;
 
 use crate::api::models::ApiGameBoard;
+use crate::api::templates::GameIndexTemplate;
 use crate::database::models::{Game, GameBoard, GameError};
 use crate::AppState;
 
@@ -22,13 +22,7 @@ pub async fn handler(
 
     let api_game_board = ApiGameBoard::from(game_board);
 
-    Ok(TemplateApiGameBoard { api_game_board })
-}
-
-#[derive(Template)]
-#[template(path = "game_index.html")]
-struct TemplateApiGameBoard {
-    api_game_board: ApiGameBoard,
+    Ok(GameIndexTemplate { api_game_board })
 }
 
 #[derive(Debug, thiserror::Error)]

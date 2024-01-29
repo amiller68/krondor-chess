@@ -6,10 +6,12 @@ use axum::{
 };
 use sqlx::types::Uuid;
 
+use crate::api::models::ApiGameBoard;
+use crate::api::templates::GameBoardTemplate;
 use crate::database::models::{Game, GameBoard, GameError};
 use crate::AppState;
 
-use super::watch_game_sse::{GameUpdate, GameUpdateStream};
+use super::watch_game_sse::GameUpdateStream;
 
 #[derive(serde::Deserialize, Debug)]
 pub struct MakeMoveRequest {
@@ -34,9 +36,11 @@ pub async fn handler(
     // Returns the updated board if the move was valid. Otherwise, returns the latest board.
     GameBoard::make_move(&mut conn, game_id, &uci_move, resign).await?;
 
+    // Wow this really sucks, the client should just read this again
+    let api_game_board = ApiGameBoard::from(GameBoard::latest(&mut conn, game_id).await?);
     conn.commit().await?;
 
-    if tx.send(GameUpdate).is_err() {
+    if tx.send(GameBoardTemplate { api_game_board }).is_err() {
         tracing::warn!("failed to send game update: game_id={}", game_id);
     }
 

@@ -8,6 +8,8 @@ use tower_http::services::ServeDir;
 mod api;
 mod database;
 
+use api::templates::GameBoardTemplate;
+
 #[derive(Clone)]
 pub struct AppState {
     database: PgPool,
@@ -37,7 +39,7 @@ async fn main(
         .expect("Looks like something went wrong with migrations :(");
     // Setup State
     let state = AppState::new(db);
-    let (tx, _rx) = channel::<api::games::watch_game_sse::GameUpdate>(10);
+    let (tx, _rx) = channel::<GameBoardTemplate>(10);
 
     // Register panics as they happen
     register_panic_logger();
@@ -58,10 +60,6 @@ async fn main(
         .route(
             "/games/:game_id/sse",
             get(api::games::watch_game_sse::handler),
-        )
-        .route(
-            "/games/:game_id/board",
-            get(api::games::read_game_board::handler),
         )
         .with_state(state)
         .layer(Extension(tx))

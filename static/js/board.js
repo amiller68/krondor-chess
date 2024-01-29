@@ -1,44 +1,7 @@
+// WOOO globabl state
 let selectedPiece = null;
 let fromSquare = null;
 let toSquare = null;
-
-// Add listeners to all squares
-document.querySelectorAll('[class*="chess-square-"]').forEach(square => {
-    // On click
-    square.addEventListener('click', function() {
-        if (!selectedPiece && squareHasPiece(this) ) {
-            // Select the piece
-            selectedPiece = this;
-            fromSquare = this;
-            this.classList.add('selected');
-        } else if (selectedPiece) {
-            if (this === selectedPiece) {
-                // Deselect the piece
-                this.classList.remove('selected');
-                selectedPiece = null;
-                return;
-            }
-
-            toSquare = this;
-            // Move the piece to the new square
-            movePiece(selectedPiece, this);
-            selectedPiece.classList.remove('selected');
-            selectedPiece = null;
-        }
-    });
-});
-
-// TODO: make this work -- so that we can reset from bad moves
-document.body.addEventListener('htmx:responseError', function(event) {
-    console.log(event);
-    // Check if the event is for the element you're interested in
-    if (event.target.id === 'submitMove') {
-        // Swap the pieces back
-        let fromSqaureHtml = fromSquare.innerHTML;
-        fromSquare.innerHTML = toSquare.innerHTML;
-        toSquare.innerHTML = fromSqaureHtml;
-    }
-});
 
 // (Overly) Simple function to check if a square has a piece
 function squareHasPiece(square) {
@@ -94,3 +57,63 @@ function sendMove(uciMove) {
     document.getElementById('moveForm').style.display = 'block';
 }
 
+initBoard = function() {
+    selectedPiece = null;
+    fromSquare = null;
+    toSquare = null;
+
+    // Remove all event listeners
+    document.querySelectorAll('[class*="chess-square-"]').forEach(square => {
+        square.replaceWith(square.cloneNode(true));
+    });
+
+    document.getElementById('moveForm').style.display = 'none';
+    document.getElementById('uciMoveInput').value = '';
+
+    // Assuming 'chessboard' is the ID of the parent element
+    const chessboard = document.getElementById('chessboard');
+    chessboard.addEventListener('click', function(event) {
+        // Check if the clicked element is a chess square
+        const clickedSquare = event.target.closest('[class*="chess-square-"]');
+        if (!clickedSquare) return; // Not a chess square, ignore the click
+        if (!selectedPiece && squareHasPiece(clickedSquare)) {
+            // Select the piece
+            selectedPiece = clickedSquare;
+            fromSquare = clickedSquare;
+            clickedSquare.classList.add('selected');
+        } else if (selectedPiece) {
+            if (clickedSquare === selectedPiece) {
+                // Deselect the piece
+                clickedSquare.classList.remove('selected');
+                selectedPiece = null;
+                return;
+            }
+
+            toSquare = clickedSquare;
+            // Move the piece to the new square
+            movePiece(selectedPiece, clickedSquare);
+            selectedPiece.classList.remove('selected');
+            selectedPiece = null;
+        }
+    });
+
+    document.body.addEventListener('htmx:responseError', function(event) {
+        // Check if the event is for the element you're interested in
+        if (event.target.id === 'submitMove') {
+            // Swap the pieces back
+            let fromSqaureHtml = fromSquare.innerHTML;
+            fromSquare.innerHTML = toSquare.innerHTML;
+            toSquare.innerHTML = fromSqaureHtml;
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    initBoard();
+});
+
+document.body.addEventListener('htmx:afterSwap', function(event) {
+    selectedPiece = null;
+    fromSquare = null;
+    toSquare = null;
+})

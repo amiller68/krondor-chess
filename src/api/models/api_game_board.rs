@@ -8,6 +8,7 @@ use crate::database::models::GameStatus;
 use crate::database::models::GameWinner;
 use crate::database::types::DatabaseBoard as Board;
 
+#[derive(Clone)]
 pub struct ApiGameBoard {
     pub game_id: String,
     pub board: Board,
