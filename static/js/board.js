@@ -87,6 +87,7 @@ initBoard = function() {
                 clickedSquare.classList.remove('selected');
                 selectedPiece = null;
                 return;
+
             }
 
             toSquare = clickedSquare;

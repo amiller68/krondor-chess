@@ -16,8 +16,6 @@ use crate::api::templates::GameBoardTemplate;
 
 // TODO: generalize and use the read_game_board handler
 pub type GameUpdateStream = Sender<GameBoardTemplate>;
-
-// TODO: proper error handling
 pub async fn handler(
     Path(game_id): Path<Uuid>,
     Extension(tx): Extension<GameUpdateStream>,
